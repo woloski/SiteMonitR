@@ -142,7 +142,11 @@ $(function () {
         var url = $(this).data('url');
         c.model.items().forEach(function (site) {
             if (site.url == url) {
-                alert(site.testResult);
+                if (typeof site.testResult === 'undefined') {
+                    alert('Test did not run');
+                } else {
+                    alert('Test Result:' + site.testResult);
+                }
             }
         });
     });

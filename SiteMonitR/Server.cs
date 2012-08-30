@@ -126,7 +126,7 @@ namespace SiteMonitR
                                    string tempFile = Path.GetTempFileName() + ".js";
                                    File.WriteAllText(tempFile, site.Test);
 
-                                   string phantom = Executor.Execute("phantomjs.exe", tempFile);
+                                   string phantom = Executor.Execute("phantomjs.exe", tempFile + " " + site.Url);
 
                                    File.Delete(tempFile);
                                    //Log("phantomjs test: " + site.Test);
@@ -195,6 +195,7 @@ namespace SiteMonitR
                 {
                     // append the new data to the data already read-in
                     outputBuilder.Append(e.Data);
+                    outputBuilder.Append(Environment.NewLine);
                 }
             );
             // start the process
