@@ -36,7 +36,7 @@ namespace SiteMonitR.WorkerRole
         public TableStorageSiteUrlRepository()
         {
             _storageAccount = CloudStorageAccount.Parse(
-                RoleEnvironment.GetConfigurationSettingValue(_connectionStringName)
+                CloudConfigurationManager.GetSetting(_connectionStringName)
                 );
 
             _tableClient = new CloudTableClient(_storageAccount.TableEndpoint.AbsoluteUri, _storageAccount.Credentials);
@@ -45,15 +45,15 @@ namespace SiteMonitR.WorkerRole
             _tableContext = _tableClient.GetDataServiceContext();
         }
 
-        public List<string> GetUrls()
+        public List<Site> GetUrls()
         {
             var r = _tableContext.CreateQuery<StoredSiteUrl>(_tableName);
-            return r.ToList().Select(x => x.Url).ToList();
+            return r.ToList().Select(x => new Site { Url = x.Url, Test = x.Test }).ToList();
         }
 
-        public void Add(string url)
+        public void Add(Site site)
         {
-            _tableContext.AddObject(_tableName, new StoredSiteUrl { Url = url });
+            _tableContext.AddObject(_tableName, new StoredSiteUrl { Url = site.Url, Test = site.Test });
             _tableContext.SaveChanges();
         }
 

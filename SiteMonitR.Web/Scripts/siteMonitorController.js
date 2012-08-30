@@ -15,14 +15,15 @@
 // herein are fictitious.  No association with any real company, 
 // organization, product, domain name, email address, logo, person, 
 // places, or events is intended or should be inferred. 
-// ---------------------------------------------------------------------------------- 
+// ----------------------------------------------------------------------------------
 $(function () {
 
     $('#noSitesToMonitorMessage').hide();
 
-    function SiteStatusItem(u, s, t) {
+    function SiteStatusItem(u, test, s, t) {
         var self = this;
         self.url = u;
+        self.test = test;
         self.cssClass = ko.observable(s);
         self.siteStatus = ko.observable(t);
     }
@@ -39,28 +40,29 @@ $(function () {
         self.connection.logging = true;
         self.siteMonitorHub = self.connection.createProxy("SiteMonitR");
 
-        this.updateSite = function (url, cssClass, siteStatus) {
-            self.model.items().forEach(function (n) {
-                if (n.url == url) {
-                    n.cssClass(cssClass);
-                    n.siteStatus(siteStatus);
+        this.updateSite = function (url, testResult, cssClass, siteStatus) {
+            self.model.items().forEach(function (site) {
+                if (site.url === url) {
+                    site.cssClass(cssClass);
+                    site.siteStatus(siteStatus);
+                    site.testResult = testResult;
                 }
             });
         };
 
-        self.addSite = function (url) {
+        self.addSite = function (url, test) {
             if ($('.site[data-url="' + url + '"]').length == 0) {
-                var site = new SiteStatusItem(url, 'btn-warning', 'Waiting');
+                var site = new SiteStatusItem(url, test, 'btn-warning', 'Waiting');
                 self.model.items.push(site);
             }
         };
 
         self.updateSiteStatus = function (monitorUpdate) {
-            if (monitorUpdate.Result == true) {
-                self.updateSite(monitorUpdate.Url, 'btn-success', 'Up');
+            if (monitorUpdate.Result.ping == true) {
+                self.updateSite(monitorUpdate.Url, monitorUpdate.Result.testResult, 'btn-success', 'Up');
             }
             else {
-                self.updateSite(monitorUpdate.Url, 'btn-danger', 'Down');
+                self.updateSite(monitorUpdate.Url, monitorUpdate.Result.testResult, 'btn-danger', 'Down');
             }
         };
 
@@ -92,7 +94,7 @@ $(function () {
         })
         .on('siteListObtained', function (sites) {
             $(sites).each(function (i, site) {
-                c.addSite(site);
+                c.addSite(site.Url, site.Test);
             });
             c.toggleSpinner(false);
             c.toggleGrid();
@@ -119,9 +121,10 @@ $(function () {
 
     $('#addSite').click(function () {
         var u = $('#siteUrl').val();
-        c.addSite(u);
+        var test = $('#test').val();
+        c.addSite(u, test);
         c.toggleSpinner(true);
-        c.siteMonitorHub.invoke('addSite', u);
+        c.siteMonitorHub.invoke('addSite', u, test);
     });
 
     $('.removeSite').live('click', function () {
@@ -133,6 +136,15 @@ $(function () {
         });
 
         c.siteMonitorHub.invoke('removeSite', url);
+    });
+
+    $('[data-identifier="showResult"]').live('click', function () {
+        var url = $(this).data('url');
+        c.model.items().forEach(function (site) {
+            if (site.url == url) {
+                alert(site.testResult);
+            }
+        });
     });
 
     c.connection.start().done(function () {

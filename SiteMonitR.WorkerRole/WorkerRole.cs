@@ -34,7 +34,7 @@ namespace SiteMonitR.WorkerRole
 
         public override void Run()
         {
-            Trace.WriteLine("SiteMonitR.WorkerRole entry point called", "Information");
+            //Trace.WriteLine("SiteMonitR.WorkerRole entry point called", "Information");
 
             while (true)
             {

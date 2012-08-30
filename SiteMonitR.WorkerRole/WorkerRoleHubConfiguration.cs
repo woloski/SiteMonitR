@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using SiteMonitR.WorkerRole.Properties;
+using Microsoft.WindowsAzure;
 
 namespace SiteMonitR.WorkerRole
 {
@@ -27,7 +28,7 @@ namespace SiteMonitR.WorkerRole
     {
         public string GetHubContainingSiteUrl()
         {
-            return RoleEnvironment.GetConfigurationSettingValue("GUI_URL");
+            return CloudConfigurationManager.GetSetting("GUI_URL");
         }
 
         public int GetPingTimeout()

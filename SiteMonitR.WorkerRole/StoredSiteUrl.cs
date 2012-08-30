@@ -33,5 +33,6 @@ namespace SiteMonitR.WorkerRole
         }
 
         public string Url { get; set; }
+        public string Test { get; set; }
     }
 }

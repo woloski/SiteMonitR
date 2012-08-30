@@ -24,6 +24,8 @@ using System.Text;
 using System.Timers;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using SignalR.Client.Hubs;
+using System.Dynamic;
+using System.IO;
 
 namespace SiteMonitR
 {
@@ -72,9 +74,9 @@ namespace SiteMonitR
                     _hub = _connection.CreateProxy("SiteMonitR");
 
                     // whenever a site is added
-                    _hub.On<string>("siteAddedToStorage", (siteUrl) =>
+                    _hub.On<string, string>("siteAddedToStorage", (siteUrl, test) =>
                         {
-                            _siteRepository.Add(siteUrl);
+                            _siteRepository.Add(new Site { Url = siteUrl, Test = test });
                             _hub.Invoke("addSiteToGui", siteUrl);
                         });
 
@@ -106,30 +108,45 @@ namespace SiteMonitR
                     _timer.Stop();
 
                     _siteRepository.GetUrls()
-                       .ForEach(x =>
+                       .ForEach(site =>
                        {
-                           var result = false;
+                           dynamic result = new ExpandoObject();
+                           result.ping = false;
 
                            try
                            {
                                // inform the client the site is being checked
-                               _hub.Invoke("checkSite", x);
+                               _hub.Invoke("checkSite", site.Url);
 
                                // check the site
-                               var output = new WebClient().DownloadString(x);
-                               result = true;
-                               Log(x + " is up");
+                               var output = new WebClient().DownloadString(site.Url);
+
+                               if (!string.IsNullOrEmpty(site.Test))
+                               {
+                                   string tempFile = Path.GetTempFileName() + ".js";
+                                   File.WriteAllText(tempFile, site.Test);
+
+                                   string phantom = Executor.Execute("phantomjs.exe", tempFile);
+
+                                   File.Delete(tempFile);
+                                   //Log("phantomjs test: " + site.Test);
+                                   Log("phantomjs result: " + phantom);
+                                   result.testResult = phantom;
+                               }
+
+                               result.ping = true;
+                               Log(site.Url + " is up");
                            }
                            catch
                            {
-                               result = false;
-                               Log(x + " is down");
+                               result.ping = false;
+                               Log(site.Url + " is down");
                            }
 
                            // invoke a method on the hub
                            _hub.Invoke("receiveMonitorUpdate", new
                            {
-                               Url = x,
+                               Url = site.Url,
                                Result = result
                            });
                        });
@@ -146,6 +163,53 @@ namespace SiteMonitR
                 if (_timer != null)
                     _timer.Stop();
             }
+        }
+    }
+
+    public class Executor
+    {
+        public static string Execute(string program, string arguments)
+        {
+            StringBuilder outputBuilder;
+            ProcessStartInfo processStartInfo;
+            Process process;
+
+            outputBuilder = new StringBuilder();
+
+            processStartInfo = new ProcessStartInfo();
+            processStartInfo.CreateNoWindow = true;
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardInput = true;
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.Arguments = arguments;
+            processStartInfo.FileName = program;
+
+            process = new Process();
+            process.StartInfo = processStartInfo;
+            // enable raising events because Process does not raise events by default
+            process.EnableRaisingEvents = true;
+            // attach the event handler for OutputDataReceived before starting the process
+            process.OutputDataReceived += new DataReceivedEventHandler
+            (
+                delegate(object sender, DataReceivedEventArgs e)
+                {
+                    // append the new data to the data already read-in
+                    outputBuilder.Append(e.Data);
+                }
+            );
+            // start the process
+            // then begin asynchronously reading the output
+            // then wait for the process to exit
+            // then cancel asynchronously reading the output
+            process.Start();
+            process.BeginOutputReadLine();
+            process.WaitForExit();
+            process.CancelOutputRead();
+
+            // use the output
+            string output = outputBuilder.ToString();
+
+            return output;
         }
     }
 }

@@ -45,9 +45,9 @@ namespace SiteMonitR.Web.Hubs
             Clients.siteRemovedFromGui(url);
         }
 
-        public void AddSite(string url)
+        public void AddSite(string url, string test)
         {
-            Clients.siteAddedToStorage(url);
+            Clients.siteAddedToStorage(url, test);
         }
 
         public void RemoveSite(string url)
@@ -60,9 +60,9 @@ namespace SiteMonitR.Web.Hubs
             Clients.siteListRequested();
         }
 
-        public void ListOfSitesObtained(List<string> urls)
+        public void ListOfSitesObtained(List<Site> sites)
         {
-            Clients.siteListObtained(urls);
+            Clients.siteListObtained(sites);
         }
 
         public void CheckSite(string url)

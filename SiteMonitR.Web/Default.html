@@ -22,12 +22,16 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span12 addSiteForm">
+            <form>
                 <label for="siteUrl">Site URL</label>
                 <input type="text" id="siteUrl" name="siteUrl" />
+                <label for="siteUrl">PhantomJS Script</label>
+                <textarea id="test" name="test" rows="10" class="input-xxlarge" placeholder="you can optionally write a phantomjs script that will run after the ping"></textarea>
                 <p>
                     <button class="btn btn-primary btn-large" id="addSite">Add Site</button>
                     <img src="content/img/spin.gif" id="spin" style="display: none;" />
                 </p>
+            </form>
             </div>
         </div>
         <table class="table" id="sites">
@@ -42,7 +46,7 @@
                 <tr class="site" data-bind="attr: { 'data-url': url }">
                     <td data-bind="text: url"></td>
                     <td style="width: 120px;">
-                        <button style="min-width: 100px;" data-bind="attr: { class: cssClass, 'data-url': url }, text: siteStatus"></button>
+                        <button style="min-width: 100px;" data-bind="attr: { class: cssClass, 'data-url': url }, text: siteStatus" data-identifier="showResult"></button>
                     </td>
                     <td style="width: 120px;">
                         <a class="removeSite btn btn-small" data-bind="attr: { 'data-url': url }" href="#"><i class="icon-remove"></i></a>
@@ -65,3 +69,4 @@
     <script src="Scripts/siteMonitorController.js"></script>
 
 </body>
+</html>

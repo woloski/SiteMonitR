@@ -23,8 +23,14 @@ namespace SiteMonitR
 {
     public interface ISiteUrlRepository
     {
-        List<string> GetUrls();
-        void Add(string url);
+        List<Site> GetUrls();
+        void Add(Site site);
         void Remove(string url);
+    }
+
+    public class Site
+    {
+        public string Url { get; set; }
+        public string Test { get; set; }
     }
 }
