@@ -57,6 +57,8 @@ namespace SiteMonitR.Web.FederatedIdentity
             config.IssuerNameRegistry = new CustomIssuerNameRegistry(thumbprint);
             var handlers = SecurityTokenHandlerCollection.CreateDefaultSecurityTokenHandlerCollection(config);
             handlers.AddOrReplace(new MachineKeySessionSecurityTokenHandler());
+            FederatedAuthentication.ServiceConfiguration.SecurityTokenHandlers.AddOrReplace(new MachineKeySessionSecurityTokenHandler());
+            
             return handlers;
         }
 
