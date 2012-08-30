@@ -22,7 +22,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Timers;
-using Microsoft.WindowsAzure.ServiceRuntime;
 using SignalR.Client.Hubs;
 using System.Dynamic;
 using System.IO;
