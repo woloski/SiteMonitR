@@ -19,12 +19,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using SignalR.Hubs;
+using System.Threading;
+using SiteMonitR.Web.FederatedIdentity;
 
 namespace SiteMonitR.Web.Hubs
 {
     [HubName("SiteMonitR")]
     public class SiteMonitRNotificationHub : Hub
     {
+        FederatedIdentityConfiguration authConfig;
+
+        public SiteMonitRNotificationHub(FederatedIdentityConfiguration authConfig)
+        {
+            this.authConfig = authConfig;
+        }
+
+        public SiteMonitRNotificationHub()
+            : this(new FederatedIdentityConfiguration())
+        {
+        }
+
+        public void IsAuthenticated()
+        {
+            if (this.authConfig.AuthEnabled)
+            {
+                Caller.isAuthenticated(new 
+                { 
+                    isAuthenticated = Thread.CurrentPrincipal.Identity.IsAuthenticated, 
+                    realm = this.authConfig.Realm, 
+                    serviceNamespace = this.authConfig.ServiceNamespace 
+                });
+                
+                return;
+            }
+            else
+            {
+                Caller.isAuthenticated(new { isAuthenticated = true });
+            }
+        }
+
         public void ServiceReady()
         {
             Clients.serviceIsUp();
@@ -47,16 +80,19 @@ namespace SiteMonitR.Web.Hubs
 
         public void AddSite(string url, string test)
         {
+            this.ThrowIfNotAuthenticated();
             Clients.siteAddedToStorage(url, test);
         }
 
         public void RemoveSite(string url)
         {
+            this.ThrowIfNotAuthenticated();
             Clients.siteRemovedFromStorage(url);
         }
 
         public void GetSiteList()
         {
+            this.ThrowIfNotAuthenticated();
             Clients.siteListRequested();
         }
 
@@ -68,6 +104,15 @@ namespace SiteMonitR.Web.Hubs
         public void CheckSite(string url)
         {
             Clients.checkingSite(url);
+        }
+
+        private void ThrowIfNotAuthenticated()
+        {
+            if (this.authConfig.AuthEnabled)
+            {
+                if (!Thread.CurrentPrincipal.Identity.IsAuthenticated)
+                    throw new UnauthorizedAccessException();
+            }
         }
     }
 }

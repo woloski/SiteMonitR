@@ -117,6 +117,19 @@ $(function () {
         .on('checkingSite', function (url) {
             c.toggleSpinner(false);
             c.updateSite(url, 'btn-info', 'Checking');
+        })
+        .on('isAuthenticated', function (authInfo) {
+            if (authInfo.isAuthenticated) {
+                c.toggleSpinner(true);
+                c.siteMonitorHub.invoke('getSiteList');
+            } else {
+                window.waadSelector(authInfo.serviceNamespace,
+                                authInfo.realm,
+                                $("#identityProviders"),
+                                "~/default.html");
+
+                $("#identityProviderSelector").modal();
+            }
         });
 
     $('#addSite').click(function () {
@@ -152,8 +165,7 @@ $(function () {
     });
 
     c.connection.start().done(function () {
-        c.toggleSpinner(true);
-        c.siteMonitorHub.invoke('getSiteList');
+        c.siteMonitorHub.invoke('isAuthenticated');
     });
 
     ko.applyBindings(c.model);

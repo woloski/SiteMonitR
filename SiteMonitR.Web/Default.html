@@ -22,7 +22,6 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span12 addSiteForm">
-            <form>
                 <label for="siteUrl">Site URL</label>
                 <input type="text" id="siteUrl" name="siteUrl" />
                 <label for="siteUrl">PhantomJS Script</label>
@@ -31,7 +30,6 @@
                     <button class="btn btn-primary btn-large" id="addSite">Add Site</button>
                     <img src="content/img/spin.gif" id="spin" style="display: none;" />
                 </p>
-            </form>
             </div>
         </div>
         <table class="table" id="sites">
@@ -56,6 +54,14 @@
         </table>
         <span id="noSitesToMonitorMessage">You have no sites to monitor. To add one, enter in the URL of the site and click the "Add Site" button above.</span>
     </div>
+    <div id="identityProviderSelector" class="modal fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Login with your identity provider</h3>
+      </div>
+      <div id="identityProviders" class="modal-body">
+      </div>
+    </div>
 
     <footer>
         
@@ -67,6 +73,7 @@
     <script src="Scripts/bootstrap.js"></script>
     <script src="Scripts/knockout-2.1.0.js"></script>
     <script src="Scripts/siteMonitorController.js"></script>
+    <script src="/Scripts/waad.selector.js" type="text/javascript"></script>
 
 </body>
 </html>
